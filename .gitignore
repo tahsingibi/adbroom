@@ -1,0 +1,11 @@
+# Build output
+build/
+*.dmg
+*.dmg.sha256
+
+# Legacy local build / personal data (never commit)
+NextTV.app/
+debloat/
+
+# macOS
+.DS_Store
