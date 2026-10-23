@@ -7,7 +7,7 @@ cd "$(dirname "$0")"
 ROOT="$PWD"
 for option in "$@"; do
   case "$option" in
-    --macos|--dmg) ;;
+    --dmg) ;;
     *) echo "Usage: ./build.sh [--dmg]. Launcher: https://github.com/tahsingibi/adbroom-launcher" >&2; exit 2 ;;
   esac
 done

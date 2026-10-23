@@ -1,7 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-[[ "${1:-}" != macos ]] || shift
 MODE="${1:---draft}"
 [[ $# -le 1 && ( "$MODE" == --draft || "$MODE" == --publish ) ]] || { echo 'Usage: ./scripts/release.sh [--draft|--publish]' >&2; exit 2; }
 command -v gh >/dev/null || { echo 'Install GitHub CLI and authenticate: gh auth login' >&2; exit 1; }

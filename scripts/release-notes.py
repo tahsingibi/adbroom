@@ -5,7 +5,6 @@ import pathlib
 import re
 parser = argparse.ArgumentParser()
 parser.add_argument('version')
-parser.add_argument('--component', choices=['macos'], default='macos')
 args = parser.parse_args()
 if not re.fullmatch(r'\d+\.\d+\.\d+', args.version):
     raise SystemExit('Use a stable version such as 1.1.0')
