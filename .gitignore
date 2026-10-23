@@ -16,7 +16,7 @@ debloat/
 .DS_Store
 
 # Launcher signing identities (keep these locally to allow APK updates)
-apps/launcher/.signing/
+.signing/
 *.jks
 *.keystore
 

@@ -49,7 +49,7 @@ struct GitHubRelease: Decodable, Equatable {
     }
     var launcherAsset: Asset? {
         assets.first { $0.name.hasPrefix("ADBroomLauncher-") && $0.name.hasSuffix(".apk")
-            && UpdateClient.isReleaseURL($0.browserDownloadURL, download: true) }
+            && UpdateClient.isReleaseURL($0.browserDownloadURL, download: true, channel: .launcher) }
     }
     var downloadURL: URL? { macAsset?.browserDownloadURL }
     func version(for channel: ReleaseChannel) -> AppVersion? {
@@ -71,10 +71,12 @@ enum UpdateError: Error, Equatable {
 
 struct UpdateClient {
     static let repository = "tahsingibi/adbroom"
+    static let launcherRepository = "tahsingibi/adbroom-launcher"
     static let releasesURL = URL(string: "https://github.com/\(repository)/releases")!
     static let latestURL = URL(string: "https://api.github.com/repos/\(repository)/releases?per_page=100&page=1")!
-    static let macReleasesURL = URL(string: "https://github.com/\(repository)/releases?q=macos-v")!
-    static let launcherReleasesURL = URL(string: "https://github.com/\(repository)/releases?q=launcher-v")!
+    static let macReleasesURL = releasesURL
+    static let launcherReleasesURL = URL(string: "https://github.com/\(launcherRepository)/releases")!
+    static let launcherLatestURL = URL(string: "https://api.github.com/repos/\(launcherRepository)/releases?per_page=100&page=1")!
     let session: URLSession
     init(session: URLSession? = nil) {
         if let session { self.session = session; return }
@@ -87,10 +89,11 @@ struct UpdateClient {
         config.urlCredentialStorage = nil
         self.session = URLSession(configuration: config)
     }
-    static func isReleaseURL(_ url: URL, download: Bool = false) -> Bool {
+    static func isReleaseURL(_ url: URL, download: Bool = false, channel: ReleaseChannel = .macOS) -> Bool {
         guard url.scheme == "https", url.host == "github.com", url.user == nil, url.password == nil,
               url.port == nil, url.query == nil, url.fragment == nil else { return false }
-        let prefix = "/\(repository)/releases/" + (download ? "download/" : "tag/")
+        let repo = channel == .macOS ? repository : launcherRepository
+        let prefix = "/\(repo)/releases/" + (download ? "download/" : "tag/")
         return url.path.hasPrefix(prefix) && url.path.count > prefix.count
     }
     static func request(_ url: URL) -> URLRequest {
@@ -121,11 +124,12 @@ struct UpdateClient {
     /// Asset and tag filters keep an independent launcher release out of Mac update checks.
     func latest(channel: ReleaseChannel = .macOS) async throws -> GitHubRelease {
         for page in 1...5 {
-            let url = URL(string: "https://api.github.com/repos/\(Self.repository)/releases?per_page=100&page=\(page)")!
+            let repository = channel == .macOS ? Self.repository : Self.launcherRepository
+            let url = URL(string: "https://api.github.com/repos/\(repository)/releases?per_page=100&page=\(page)")!
             let response = try await data(Self.request(url), limit: 4_194_304)
             guard let releases = try? JSONDecoder().decode([GitHubRelease].self, from: response) else { throw UpdateError.invalidResponse }
             let eligible = releases.filter { release in
-                !release.draft && !release.prerelease && Self.isReleaseURL(release.htmlURL)
+                !release.draft && !release.prerelease && Self.isReleaseURL(release.htmlURL, channel: channel)
                 && release.version(for: channel) != nil
                 && (channel == .macOS ? release.macAsset != nil : release.launcherAsset != nil)
             }

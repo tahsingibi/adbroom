@@ -48,7 +48,7 @@ extension UpdateClient {
         if let digest = asset.digest, digest.hasPrefix("sha256:"), let checksum = LauncherDownload.digest(String(digest.dropFirst(7))) {
             expected = checksum
         } else {
-            guard let sidecar = release.assets.first(where: { $0.name == asset.name + ".sha256" && Self.isReleaseURL($0.browserDownloadURL, download: true) }) else { throw LauncherDownloadError.noChecksum }
+            guard let sidecar = release.assets.first(where: { $0.name == asset.name + ".sha256" && Self.isReleaseURL($0.browserDownloadURL, download: true, channel: .launcher) }) else { throw LauncherDownloadError.noChecksum }
             let response = try await data(URLRequest(url: sidecar.browserDownloadURL), limit: 4096)
             let pieces = String(decoding: response, as: UTF8.self).split(whereSeparator: \.isWhitespace)
             guard let first = pieces.first, let checksum = LauncherDownload.digest(String(first)),

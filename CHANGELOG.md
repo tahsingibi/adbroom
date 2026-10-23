@@ -1,8 +1,9 @@
 # Sürüm notları / Release notes
 
-## 1.1.0 — Yayınlanmadı / Unreleased
+## 1.1.0 — 2026-10-23
 
 ### Mac uygulaması
+- Mac ve TV launcher ayrı GitHub repolarına taşındı. Mac kaynakları kökte sadeleştirildi; launcher indirme ve sağlama toplamı doğrulaması `tahsingibi/adbroom-launcher` yayınlarını kullanır.
 - Kenar çubuğu düğmesinin uzayan kapsül görünümü giderildi; kompakt native araç çubuğu ve sabit ikon boyutu kullanılır.
 - Mac arayüzü baştan tasarlandı: ortak kart/başlık sistemi, yeni kenar çubuğu ve bağlantı paneli, kumanda çalışma alanı, ekran önizleme alanı, aranabilir uygulama listesi, sade launcher editörü ve yeni Genel/form ekranları.
 - Paket içindeki ikon açılışta doğrudan Dock'a uygulanır; yerinde güncelleme sonrası eski ikon önbellekte kalmaz.
@@ -38,4 +39,4 @@
 ## 1.0.0 — GitHub'da yayımlandı / Published on GitHub
 - İlk yayımlanmış Mac sürümü. / First published Mac release.
 
-[Launcher sürüm notları](apps/launcher/CHANGELOG.md) / [Launcher release notes](apps/launcher/CHANGELOG.md)
+[Launcher sürüm notları](https://github.com/tahsingibi/adbroom-launcher/blob/main/CHANGELOG.md) / [Launcher release notes](https://github.com/tahsingibi/adbroom-launcher/blob/main/CHANGELOG.md)

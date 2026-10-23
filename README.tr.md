@@ -1,102 +1,76 @@
 <p align="center"><img src="assets/branding/adbroom-icon.png" width="128" alt="ADBroom"></p>
-<h1 align="center">ADBroom</h1>
-<p align="center">Native Mac uygulaması ve bağımsız Android TV launcher’ı.<br><a href="README.md">English</a> · <b>Türkçe</b></p>
+<h1 align="center">ADBroom Mac</h1>
+<p align="center">Android TV'n için native çalışma alanı.<br><a href="README.md">English</a> · <b>Türkçe</b></p>
 
-## İndireceğin ürünü seç
+[Mac uygulamasını indir](https://github.com/tahsingibi/adbroom/releases) · [Bağımsız TV launcher'ı](https://github.com/tahsingibi/adbroom-launcher) · [Sürüm notları](CHANGELOG.md)
 
-| Ürün | Platform | İndirme | Diğer uygulama gerekli mi? |
-| --- | --- | --- | --- |
-| **ADBroom Mac** | macOS 14+, Apple Silicon / Intel | [Mac yayınları](https://github.com/tahsingibi/adbroom/releases?q=macos-v) — `ADBroom-<sürüm>.dmg` | Hayır |
-| **ADBroom Launcher** | Android TV / Google TV / Fire TV, Android 6+ | [Launcher yayınları](https://github.com/tahsingibi/adbroom/releases?q=launcher-v) — `ADBroomLauncher-<sürüm>.apk` | Hayır |
+## Neler yapabilirsin?
 
-İki ürünün sürümleri ve paketleri bağımsızdır. Yalnızca TV ana ekranı istiyorsan APK’yı indirmen yeterli; Mac uygulamasını kurman gerekmez. Mac uygulamasından launcher daha sonra indirilebilir; DMG’nin içinde APK yoktur. İndirme dosyaları ve SHA-256 kayıtları yayımlanan GitHub Release’in Assets bölümündedir; kaynak kod tek başına kurulum paketi değildir.
+- **Kumanda:** yön, ses, kanal, kaynak, medya, güç ve klavye; bilgisayar kısayollarıyla kontrol.
+- **Ekran:** scrcpy ile sesli/görüntülü izleme, ekran görüntüsü alma ve PNG kaydetme.
+- **Uygulamalar:** APK/split APK yükleme, ad/paket araması, açma/durdurma ve varsayılan ana ekran seçimi.
+- **Launcher:** ayrı GitHub reposundan isteğe bağlı launcher kurma; sıralama, favoriler, özel adlar, koleksiyonlar, gizleme, görünüm/modüller ve JSON yedekleme.
+- **Paketler:** geri alma kayıtları ve kritik paket korumasıyla gereksiz paketleri kapatma/geri açma.
+- **Genel:** Hakkında → Sistem → Güncellemeler sırasıyla tek sayfa. Sistem/Açık/Koyu görünüm ve otomatik güncelleme kontrolü.
+- Türkçe / English; native SwiftUI, tutarlı kartlar/formlar ve kalıcı TV bağlantı paneli.
 
-## Mac uygulaması
+## Kurulum ve TV bağlantısı
 
-Arayüz; ortak başlıklar, kartlar ve bağlantı paneli etrafında yeniden tasarlandı. Kumanda bölümlü bir kontrol panelidir; Uygulamalar sayfasında ad/paket araması ve satır işlem menüsü, Launcher’da sade sıralama alanı bulunur. Genel → Hakkında alanında Sistem, Açık ve Koyu görünüm seçilebilir.
+**macOS 14+**, Apple Silicon veya Intel gerekir. Bu reponun Releases bölümünden DMG'yi indir, aç ve ADBroom'u Uygulamalar'a taşı. Paket ad-hoc imzalıdır; notarize değildir. macOS **Sistem Ayarları → Gizlilik ve Güvenlik → Yine de Aç** seçeneğini gösterebilir.
 
-- Kumanda: yön, ses, kanal, Kaynak, medya, metin ve açma/kapatma.
-- Ekran: scrcpy ile sesli/görüntülü izleme ve ekran görüntüsü; DRM/HDMI yakalama TV’ye bağlıdır.
-- Uygulamalar: APK/split-APK yükleme, açma/durdurma, varsayılan ana ekran ve uygulama ayarları.
-- Launcher editörü: sıralama, favori, ad, klasör, gizleme, görünüm/modüller ve JSON yedekleme.
-- Paketler: kritik paket koruması ve geri alma kaydıyla kapatma/geri açma; asla kaldırmaz.
-- **Genel:** Hakkında, Sistem ve Güncellemeler bloklarını bu sırayla gösteren tek sayfa.
-- Türkçe / English.
-
-Kenar çubuğunda sayfalar ve TV bağlantı kontrolleri birlikte bulunur; araç çubuğundaki düğmeyle gizlenip gösterilir. Launcher'da satırları sürükleyerek veya oklarla sırala, satırdaki ayar simgesinden uygulama tercihlerini aç ve **TV'ye kaydet** ile uygula. **Ayarlar** launcher profilini, **Yedek** JSON içe/dışa aktarmayı yönetir. TV verisi yenilenirken ve kaydedilirken ilgili düzenleme kontrolleri bekler.
-
-DMG’yi açıp ADBroom’u Uygulamalar’a taşı. Paket ad-hoc imzalıdır, notarize değildir; ilk açılışta **Sistem Ayarları → Gizlilik ve Güvenlik → Yine de Aç** gerekebilir. TV işlemleri için araçları kur:
+TV araçlarını kur:
 
 ```sh
 brew install android-platform-tools scrcpy
 ```
 
-TV’de geliştirici seçeneklerini ve USB/ağ/kablosuz hata ayıklamayı aç, Mac ile aynı ağa bağla, IP adresini ADBroom’a gir ve TV’deki izin sorusunu onayla. TV eşleştirme kodu istiyorsa önce **Eşleştir** ile IP:port/kodu kullan; sonra bağlantı IP:port’una bağlan.
+TV'de geliştirici seçeneklerini ve USB/ağ/kablosuz hata ayıklamayı aç. TV ve Mac aynı ağdayken IP'yi bağlantı paneline gir; TV'deki izin sorusunu onayla. Eşleştirme kodu istenirse önce bağlantı simgesinden eşleştirme IP:port/koduyla eşleştir, sonra bağlantı IP:port'una bağlan.
 
-## Mac gerektirmeyen TV launcher’ı
+## Launcher ayrı bir üründür
 
-Native ızgara/yatay sıra, favoriler, özel adlar, klasörler, gizleme, duvar kâğıdı, saat, modüller ve isteğe bağlı ebeveyn PIN’i. INTERNET izni, reklam, WebView veya üçüncü taraf çalışma zamanı yok. Ayarlar ve tercihler TV kumandasından, Mac olmadan yönetilir.
+Launcher kaynakları, sürümleri, APK'ları ve yayınları kendi reposundadır:
 
-APK’yı Launcher yayınlarından indirip TV’ye aktar. TV’nin APK yükleyicisiyle veya **herhangi bir** desteklenen bilgisayardan ADB ile kur:
+**[tahsingibi/adbroom-launcher](https://github.com/tahsingibi/adbroom-launcher)**
 
-```sh
-adb connect <TV-IP>:5555
-adb -s <TV-IP>:5555 install -r ADBroomLauncher-1.2.1.apk
-```
+Mac uygulaması olmadan kullanılabilir. Yalnızca TV ana ekranı istiyorsan APK yeterlidir. Bu repo yalnızca Mac uygulamasını derler; DMG'de APK bulunmaz, JDK/Android SDK gerekmez.
 
-TV’nin varsayılan ana ekran ayarlarından ADBroom’u seç. OK uygulamayı açar; uzun OK seçenekleri açar; Menü sıralamayı başlatır; yön tuşları taşır, OK kaydeder, Geri iptal eder. Gizli uygulamalara launcher ayarlarından ulaşılır. Bazı üreticiler Home seçimini kısıtlar; isteğe bağlı Home yönlendirme hizmeti ayarlarda açıklanır ve sistemden kullanıcı tarafından açılır. Medya erişimi de isteğe bağlıdır. PIN launcher girişlerini korur; Android’in tamamını kilitlemez.
-
-Mac’te **Genel → Hakkında → Launcher APK indir** dosyayı TV bağlantısı olmadan da kaydeder. TV bağlıyken **Launcher → Yükle/Güncelle**, ayrı GitHub paketini indirir, sağlama toplamını doğrular ve ADB ile kurar. Yerel dosya için **Uygulamalar → APK yükle** kullanılabilir. Android güncellemelerinde aynı APK imza kimliği korunmalıdır.
-
-## Güncellemeler ve sürüm notları
-
-**ADBroom → ADBroom Hakkında** Genel sayfasını açar. Güncellemeler bloğu elle kontrol ve açılışta/etkinleşmede en fazla günde bir otomatik kontrol sunar. **ADBroom → Güncellemeleri kontrol et** de aynı sayfaya gider. Mac ve launcher yayınları ayrı filtrelenir; yeni bir APK, Mac güncellemesi olarak sunulmaz. GitHub’a TV verisi gönderilmez; indirme ve kurulumu kullanıcı başlatır.
-
-**Mac 1.1.0 (yayınlanmadı):** Hakkında/Sistem/Güncellemeler bloklarıyla Genel sayfası, bağımsız paketler, doğrulanmış launcher indirme, düzeltilen Launcher/kenar çubuğu yerleşimi ve yeni ortak ikon. **v1.0.0**, önceki yayımlanmış Mac sürümüdür. **Launcher 1.2.1 (yayınlanmadı):** bağımsız sürümlü APK/SHA-256 dağıtımı ve eşleşen ikon/TV görseli. Yerel derleme GitHub'da sürüm yayımlamaz.
-
-[Tüm Mac/proje sürüm notları](CHANGELOG.md) · [Launcher sürüm notları](apps/launcher/CHANGELOG.md) · [Yayın rehberi](docs/RELEASING.md)
+**Genel → Hakkında → Launcher APK indir** TV bağlantısı olmadan da dosyayı kaydeder. TV bağlıyken kurulum düğmesi veya **Launcher işlemleri → Launcher'ı güncelle**, kararlı APK'yı kendi reposundan indirir, SHA-256 doğrulamasından sonra ADB ile kurar. Yerel dosyalar için **Uygulamalar → APK yükle** kullanılır. Launcher editöründe sıralamayı/tercihleri düzenleyip **TV'ye kaydet** ile uygula; **Görünüm ve modüller** profili, **Yedek** JSON içe/dışa aktarmayı açar. Varsayılan ana ekran Uygulamalar veya Launcher işlem menüsünden seçilir.
 
 ## Klasörler ve derleme
 
 ```text
-apps/
-  macos/       Sources/, Resources/, Tests/, VERSION, BUILD_NUMBER, build.sh
-  launcher/    src/, res/, tests/, AndroidManifest.xml, build.sh
-assets/branding/ ortak şeffaf ikon ve özgün görsel
-scripts/       release-notes.py, release.sh
-docs/          yayın ve geliştirme notları
-build/
-  macos/       ADBroom.app
-  ADBroom.app  macos/ADBroom.app için uyumluluk bağlantısı
-  launcher/    geliştirme APK’sı
-dist/
-  macos/       sürümlü DMG + SHA-256
-  launcher/    sürümlü APK + SHA-256
+Sources/          Mac SwiftUI, ADB ve launcher köprüsü
+Resources/        Mac uygulama ikonu
+Tests/            Güncelleme/indirme ve launcher protokol testleri
+assets/branding/  Özgün görsel ve şeffaf ikon
+scripts/          Mac yayın ve ikon yardımcıları
+docs/             Geliştirme, repo ve yayın rehberleri
+VERSION           Mac sürümü
+BUILD_NUMBER      Mac derleme numarası
+build.sh          Yalnızca Mac universal derleme
+build/            ADBroom.app ve derleyici önbelleği (Git dışında)
+dist/             DMG ve SHA-256 (Git dışında)
 ```
 
 ```sh
-./build.sh                 # Yalnızca Mac; Xcode/Command Line Tools
-./build.sh --dmg           # Mac + dist/macos altında DMG/sağlama toplamı
-./build.sh --launcher      # Bağımsız APK; JDK 17+, Python 3, Android SDK
-./build.sh --all --dmg     # İki ürünü ayrı paketler olarak hazırla
-./scripts/release.sh macos # Derle ve GitHub taslak sürümü oluştur
-./scripts/release.sh launcher
+./build.sh          # build/ADBroom.app
+./build.sh --dmg    # ayrıca dist/ADBroom-<sürüm>.dmg ve .sha256
 ```
 
-Mac derlemek için JDK/Android SDK gerekmez. Launcher derlemek için Swift/Xcode gerekmez. [Mac geliştirme](apps/macos/README.md) ve [launcher derleme/imzalama/test](apps/launcher/README.md) ayrıntılarına bak. Başarısız derleme önceki doğrulanmış uygulamayı korur. İmza anahtarları, kullanıcı verileri ve çıktılar depoya eklenmez.
+Xcode veya Command Line Tools yeterlidir. Başarısız derleme önceki doğrulanmış uygulamayı korur. Swift önbelleği `build/.module-cache` içindedir. `build/ADBroom.app` veya kurulu `/Applications/ADBroom.app` dosyasını aç.
 
-Derlemeden sonra **`build/macos/ADBroom.app`** dosyasını aç. Eski `build/ADBroom.app` yolu da aynı güncel uygulamaya bağlanır. Swift modül önbelleği `build/macos/.module-cache` içindedir. Uygulamalar klasöründeki kopya çalışıyorsa yeni derlemeyle değiştirmeden önce onu kapat.
+[Geliştirme/test](docs/DEVELOPMENT.md) · [Yayınlama](docs/RELEASING.md) · [İki repo haritası](docs/REPOSITORIES.md) · [Görseller](assets/branding/README.md)
 
-## Uygulama görselleri
+## Yayınlar ve güncellemeler
 
-Mac ikonu, bağımsız launcher ikonu, TV görseli ve README başlıkları aynı Android TV / sihirli değnek tasarımını kullanır. Şeffaf ana görsel, gönderilen ikonun yuvarlatılmış dış hatlarını korur; platform boyutları oran bozulmadan hazırlanır. Ayrıntılar: [görsel kaynakları](assets/branding/README.md).
+Mac güncellemeleri `tahsingibi/adbroom`, launcher APK'ları `tahsingibi/adbroom-launcher` üzerinden gelir. APK, Mac güncellemesi sayılmaz; başka repodan kurulum dosyası kabul edilmez. Kararlı Mac etiketleri `macos-v<sürüm>` biçimindedir; eski `v<sürüm>` Mac etiketleri de desteklenir. **Mac 1.1.0** yeni arayüzü, APK/varsayılan uygulama yönetimini ve bağımsız launcher entegrasyonunu içerir; [sürüm notlarına](CHANGELOG.md) bak.
 
-GitHub yayınlamak için `brew install gh` ve `gh auth login` gerekir. Yayın betiği varsayılan olarak taslak oluşturur; hemen yayınlamak için `--publish` kullan. Ayrıntılar: [yayın rehberi](docs/RELEASING.md).
+GitHub CLI ile giriş yaptıktan sonra `./scripts/release.sh` taslak, `./scripts/release.sh --publish` herkese açık DMG/sağlama toplamı yayını oluşturur. Kaynak commit'i tek başına kurulum paketi değildir. Günlük kontrol Genel'den kapatılabilir; indirme/kurulumu kullanıcı başlatır. GitHub'a TV bilgisi veya uygulama listesi gönderilmez.
 
 ## Sınırlar ve teşekkürler
 
-DRM’li içerik, canlı TV ve HDMI izleme penceresinde siyah görünebilir. Donanım kodlayıcısı olmayan TV’de takılma olursa kaliteyi düşür. Derin uykudan açma Wake-on-LAN desteğine bağlıdır. HDMI, medya ve Home modülleri TV/üretici API’leriyle sınırlıdır.
+DRM, canlı TV ve HDMI siyah görünebilir. Zayıf TV'lerde izleme kalitesini düşürmek gerekebilir; ses için Android 11+ gerekir. Derin uykudan açma Wake-on-LAN desteğine bağlıdır. Ana ekran/HDMI/medya desteği üretici API'leriyle sınırlıdır. APK güncellemelerinde aynı imza kimliği korunmalıdır.
 
-İlk TV temizleme akışı [Mert Çobanov’un rehberine](https://tv.cobanov.dev/) dayanır. Ekran izleme [scrcpy](https://github.com/Genymobile/scrcpy) kullanır.
+Tahsin Sungur · [X/tahsingibi](https://x.com/tahsingibi) · [sungur.dev](https://sungur.dev)
 
-[MIT](LICENSE). Kullanım sorumluluğu sana aittir. Google veya TV üreticileriyle bağlantılı değildir. Android, Google LLC’nin ticari markasıdır. Android robotu Google tarafından paylaşılan çalışmadan [Creative Commons 3.0 Atıf Lisansı](https://creativecommons.org/licenses/by/3.0/) koşullarıyla kullanılır.
+İlk TV temizleme akışı [Mert Çobanov'un rehberinden](https://tv.cobanov.dev/) yararlanır; izleme [scrcpy](https://github.com/Genymobile/scrcpy) kullanır. [MIT](LICENSE). Google veya TV üreticileriyle bağlantılı değildir. Android, Google LLC'nin ticari markasıdır. Android robotu Google'ın paylaştığı çalışmadan [Creative Commons 3.0 Atıf Lisansı](https://creativecommons.org/licenses/by/3.0/) koşullarıyla kullanılır.

@@ -69,11 +69,18 @@ struct UpdatesTests {
         }
         let apkBytes = Data([0x50, 0x4b]) + Data("independent launcher".utf8)
         let checksum = SHA256.hash(data: apkBytes).map { String(format: "%02x", $0) }.joined()
-        let apkURL = "https://github.com/tahsingibi/adbroom/releases/download/launcher-v9.0.0/ADBroomLauncher-9.0.0.apk"
+        let apkURL = "https://github.com/tahsingibi/adbroom-launcher/releases/download/launcher-v9.0.0/ADBroomLauncher-9.0.0.apk"
         let apk: [String: Any] = ["name": "ADBroomLauncher-9.0.0.apk", "browser_download_url": apkURL, "size": apkBytes.count, "digest": "sha256:" + checksum]
-        let launcher = object(["tag_name": "launcher-v9.0.0", "html_url": "https://github.com/tahsingibi/adbroom/releases/tag/launcher-v9.0.0", "assets": [apk]])
+        let launcher = object(["tag_name": "launcher-v9.0.0", "html_url": "https://github.com/tahsingibi/adbroom-launcher/releases/tag/launcher-v9.0.0", "assets": [apk]])
         let mac = object(["tag_name": "macos-v3.0.0", "html_url": "https://github.com/tahsingibi/adbroom/releases/tag/macos-v3.0.0"])
-        ReleaseProtocol.handler = { _ in (200, try! JSONSerialization.data(withJSONObject: [launcher, mac])) }
+        ReleaseProtocol.handler = { request in
+            precondition(request.url == UpdateClient.latestURL || request.url == UpdateClient.launcherLatestURL)
+            return (200, try! JSONSerialization.data(withJSONObject: [launcher, mac]))
+        }
+        precondition(UpdateClient.launcherLatestURL.path.contains("/adbroom-launcher/"))
+        precondition(UpdateClient.isReleaseURL(URL(string: "https://github.com/tahsingibi/adbroom-launcher/releases/tag/launcher-v9.0.0")!, channel: .launcher))
+        precondition(!UpdateClient.isReleaseURL(URL(string: "https://github.com/tahsingibi/adbroom/releases/tag/launcher-v9.0.0")!, channel: .launcher))
+        precondition(!UpdateClient.isReleaseURL(URL(string: "https://github.com/tahsingibi/adbroom-launcher/releases/tag/macos-v9.0.0")!))
         let selectedMac = try await client.latest(); precondition(selectedMac.tagName == "macos-v3.0.0")
         let selectedTV = try await client.latest(channel: .launcher); precondition(selectedTV.tagName == "launcher-v9.0.0")
         let file = try await client.downloadLauncher(using: { request in
@@ -120,6 +127,12 @@ struct UpdatesTests {
             return (200, try! JSONSerialization.data(withJSONObject: [launcher]))
         }
         let pagedTV = try await client.latest(channel: .launcher); precondition(pagedTV.tagName == "launcher-v9.0.0")
+        // An APK and checksum from the former shared repo cannot cross the new trust boundary.
+        var wrongRepository = launcher
+        wrongRepository["assets"] = [["name": "ADBroomLauncher-9.0.0.apk", "browser_download_url": "https://github.com/tahsingibi/adbroom/releases/download/launcher-v9.0.0/ADBroomLauncher-9.0.0.apk"]]
+        ReleaseProtocol.handler = { _ in (200, try! JSONSerialization.data(withJSONObject: [wrongRepository])) }
+        do { _ = try await client.latest(channel: .launcher); preconditionFailure("Accepted APK from the wrong repository") }
+        catch { precondition(error as? UpdateError == .noRelease) }
         let suite = "ADBroom.UpdatesTests.\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
