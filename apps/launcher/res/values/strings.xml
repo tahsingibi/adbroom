@@ -1,0 +1,15 @@
+<resources>
+    <string name="apps">Your apps</string>
+    <string name="tagline">A little less. A lot faster.</string>
+    <string name="hint">OK to open · Hold OK for app options · Menu to rearrange</string>
+    <string name="moving">Move with arrow keys · OK to save · Back to cancel</string>
+    <string name="settings">Settings</string>
+    <string name="reorder">Rearrange</string>
+    <string name="done">Save order</string>
+    <string name="empty">No apps found</string>
+    <string name="changed">Order changed on your Mac. The latest order is now shown.</string>
+    <string name="save_failed">Could not save the order. Try again.</string>
+    <string name="open_failed">This app could not be opened.</string>
+    <string name="loading">Loading your apps…</string>
+<string name="home_key_description">Routes Home to ADBroom. Observes only the Home key and when another home screen opens. Does not read screen contents.</string>
+</resources>

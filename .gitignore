@@ -1,7 +1,12 @@
 # Build output
 build/
+dist/
 *.dmg
 *.dmg.sha256
+*.apk
+*.apks
+*.aab
+*.idsig
 
 # Legacy local build / personal data (never commit)
 NextTV.app/
@@ -9,3 +14,12 @@ debloat/
 
 # macOS
 .DS_Store
+
+# Launcher signing identities (keep these locally to allow APK updates)
+apps/launcher/.signing/
+*.jks
+*.keystore
+
+# Python test caches
+__pycache__/
+*.pyc

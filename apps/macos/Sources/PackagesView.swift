@@ -41,23 +41,22 @@ struct PackagesView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(L("Paketler", "Packages")).font(.headline)
-                    Text(L("Yalnızca kapatır (pm disable-user); asla silmez. Her şey tek tıkla geri açılır. Kritik paketler kilitlidir.",
-                           "Only disables (pm disable-user); never uninstalls. Everything can be re-enabled in one click. Critical packages are locked."))
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-                Spacer()
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(alignment: .top, spacing: 16) {
+                RoomHeader(title: L("Daha hafif bir TV.", "A lighter TV."), subtitle: L("Gereksiz paketleri kapat. İhtiyaç duyduğunda geri aç.", "Disable unwanted packages. Bring them back whenever you need."), eyebrow: L("PAKETLER", "PACKAGES"))
                 if tv.busy { ProgressView().controlSize(.small) }
-                Button(L("Yenile", "Refresh")) { Task { await tv.loadPackages() } }
-                Button(showLog ? L("Listeyi göster", "Show list") : L("Kayıt", "Log")) { showLog.toggle() }
-                Button(L("Tümünü geri al (\(tv.records.count))…", "Revert all (\(tv.records.count))…"), role: .destructive) {
-                    confirmRevert = true
-                }
-                .disabled(tv.records.isEmpty || tv.busy)
+                Button { Task { await tv.loadPackages() } } label: { Image(systemName: "arrow.clockwise") }.help(L("Yenile", "Refresh"))
+                Menu {
+                    Button(showLog ? L("Listeyi göster", "Show list") : L("İşlem geçmişi", "Activity log")) { showLog.toggle() }
+                    Button(L("Tümünü geri aç (\(tv.records.count))…", "Re-enable all (\(tv.records.count))…")) { confirmRevert = true }.disabled(tv.records.isEmpty || tv.busy)
+                } label: { Label(L("İşlemler", "Actions"), systemImage: "ellipsis.circle") }
             }
+            HStack(spacing: 16) {
+                RoomBadge(text: L("\(tv.packages.filter { !$0.disabled }.count) açık", "\(tv.packages.filter { !$0.disabled }.count) enabled"), color: .green)
+                RoomBadge(text: L("\(tv.packages.filter { $0.disabled }.count) kapalı", "\(tv.packages.filter { $0.disabled }.count) disabled"), color: .orange)
+                Spacer()
+                Label(L("Kritik paketler korunur", "Critical packages protected"), systemImage: "lock.shield").font(.caption).foregroundStyle(.secondary)
+            }.padding(16).roomSurface()
 
             if showLog {
                 ScrollView {
@@ -78,9 +77,9 @@ struct PackagesView: View {
                     }
                     .labelsHidden()
                     .frame(maxWidth: 240)
-                    TextField(L("Ara…", "Search…"), text: $search).textFieldStyle(.roundedBorder).frame(maxWidth: 260)
+                    RoomSearch(text: $search, prompt: L("Paket ara", "Search packages")).frame(maxWidth: 300)
                     Spacer()
-                    Text("\(rows.count)").font(.caption).foregroundStyle(.secondary)
+                    Text(L("\(rows.count) sonuç", "\(rows.count) results")).font(.caption).foregroundStyle(.secondary)
                 }
                 Table(rows) {
                     TableColumn(L("Durum", "State")) { row in
@@ -91,9 +90,9 @@ struct PackagesView: View {
                     .width(90)
                     TableColumn(L("Paket", "Package")) { row in
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(row.package).font(.system(.body, design: .monospaced))
+                            Text(row.package).font(.system(size: 11, weight: .medium, design: .monospaced)).lineLimit(1)
                             if let info = PackageDB.info(row.package) {
-                                Text((info.caution ? "⚠︎ " : "") + info.text).font(.caption).foregroundStyle(.secondary)
+                                Text((info.caution ? "⚠︎ " : "") + info.text).font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(2)
                             }
                         }
                     }
@@ -102,11 +101,11 @@ struct PackagesView: View {
                     }
                     .width(70)
                     TableColumn("") { row in action(row) }
-                        .width(150)
-                }
+                        .width(130)
+                }.clipShape(RoundedRectangle(cornerRadius: 14)).overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(RoomTheme.line))
             }
         }
-        .padding(20)
+        .padding(28)
         .task { if tv.packages.isEmpty { await tv.loadPackages() } }
         .confirmationDialog(pendingTitle, isPresented: Binding(get: { pending != nil }, set: { if !$0 { pending = nil } }), presenting: pending) { row in
             Button(L("Kapat", "Disable"), role: .destructive) { Task { await tv.disable(row.package) } }

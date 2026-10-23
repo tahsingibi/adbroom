@@ -32,7 +32,15 @@ final class TVModel: ObservableObject {
         didSet { UserDefaults.standard.set(lang.rawValue, forKey: "lang") }
     }
     @Published var target: String = UserDefaults.standard.string(forKey: "target") ?? "" {
-        didSet { UserDefaults.standard.set(target, forKey: "target") }
+        didSet {
+            UserDefaults.standard.set(target, forKey: "target")
+            launcherInstalled = false
+            launcherApps = []
+            launcherRevision = nil
+            launcherUserID = nil
+            launcherConfiguration = nil
+            launcherError = ""
+        }
     }
 
     // MARK: Connection
@@ -52,6 +60,16 @@ final class TVModel: ObservableObject {
 
     // MARK: Apps / packages / system
     @Published var apps: [TVApp] = []
+    @Published var homeApps: [TVApp] = []
+    @Published var currentHome = ""
+    @Published var managingApps = false
+    @Published var launcherInstalled = false
+    @Published var launcherLoading = false
+    @Published var launcherApps: [LauncherApp] = []
+    @Published var launcherRevision: Int64?
+    @Published var launcherUserID: Int?
+    @Published var launcherConfiguration: LauncherConfiguration?
+    @Published var launcherError = ""
     @Published var packages: [PackageRow] = []
     @Published var liveProtected: [String: PackageDB.Protect] = [:]
     @Published var records: [String] = []
@@ -72,7 +90,13 @@ final class TVModel: ObservableObject {
         statusTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
             Task { @MainActor in await self?.refreshState() }
         }
-        if !target.isEmpty { Task { await connect() } }
+    }
+
+    /// Start the persisted connection after SwiftUI has committed the initial view tree.
+    func connectSavedTargetIfNeeded() async {
+        await Task.yield()
+        guard !target.trimmingCharacters(in: .whitespaces).isEmpty, state == .idle else { return }
+        await connect()
     }
 
     // MARK: - Connection
@@ -277,6 +301,92 @@ final class TVModel: ObservableObject {
             guard seen.insert(String(pkg)).inserted else { return nil }
             return TVApp(package: String(pkg), component: s)
         }.sorted { $0.package < $1.package }
+    }
+
+    /// Install a standalone APK, or the base and split APKs of one application together.
+    @discardableResult
+    func installAPKs(_ urls: [URL]) async -> Bool {
+        guard connected, !managingApps, !urls.isEmpty else { return false }
+        guard urls.allSatisfy({ $0.isFileURL && $0.pathExtension.lowercased() == "apk"
+            && FileManager.default.isReadableFile(atPath: $0.path) }) else {
+            lastMessage = L("Okunabilir .apk dosyaları seç.", "Select readable .apk files.")
+            return false
+        }
+        managingApps = true
+        defer { managingApps = false }
+        let destination = serial
+        lastMessage = L("APK yükleniyor… Büyük dosyalarda birkaç dakika sürebilir.",
+                        "Installing APK… Large files may take a few minutes.")
+        let command = urls.count == 1 ? "install" : "install-multiple"
+        let r = await ADB.run(["-s", destination, command, "-r"] + urls.map(\.path), timeout: 300)
+        guard serial == destination else { return false }
+        if r.ok && r.lines.contains("Success") {
+            lastMessage = L("Uygulama TV'ye yüklendi.", "Application installed on the TV.")
+            await loadApps()
+            await loadDefaults()
+            if !packages.isEmpty { await loadPackages() }
+            return true
+        } else {
+            lastMessage = L("Yükleme tamamlanamadı: ", "Installation did not complete: ") + r.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return false
+    }
+
+    private func homeCandidates(_ result: ADB.Result) -> [TVApp] {
+        guard result.ok else { return [] }
+        return result.lines.compactMap { line in
+            let parts = line.split(separator: "/", omittingEmptySubsequences: false)
+            guard parts.count == 2, ADB.isPackageName(String(parts[0])),
+                  String(parts[1]).range(of: #"^[A-Za-z0-9_.$]+$"#, options: .regularExpression) != nil else { return nil }
+            return TVApp(package: String(parts[0]), component: line)
+        }
+    }
+
+    func loadDefaults() async {
+        let destination = serial
+        let candidates = await shell("cmd package query-activities --brief --user current -a android.intent.action.MAIN -c android.intent.category.HOME", timeout: 8)
+        let resolved = await shell("cmd package resolve-activity --brief --user current -a android.intent.action.MAIN -c android.intent.category.HOME", timeout: 8)
+        guard serial == destination else { return }
+        homeApps = Array(Set(homeCandidates(candidates))).sorted { $0.component < $1.component }
+        currentHome = homeCandidates(resolved).first?.component ?? ""
+    }
+
+    func setDefaultHome(_ component: String) async {
+        guard connected, !managingApps, homeApps.contains(where: { $0.component == component }) else { return }
+        managingApps = true
+        defer { managingApps = false }
+        let destination = serial
+        let r = await shell("cmd package set-home-activity --user current \(ADB.quote(component))")
+        guard serial == destination else { return }
+        await loadDefaults()
+        await detectProtected()
+        let pkg = component.split(separator: "/").first.map(String.init)
+        if r.ok && currentHome.split(separator: "/").first.map(String.init) == pkg {
+            lastMessage = L("Varsayılan ana ekran değiştirildi.", "Default home app changed.")
+        } else {
+            lastMessage = L("Ana ekran değiştirilemedi. TV'nin varsayılan uygulama ayarlarını deneyebilirsin.\n",
+                            "Could not change the home app. Try the TV's default app settings.\n") + r.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+    }
+
+    func openDefaultSettings(package: String? = nil) async {
+        guard connected, !managingApps else { return }
+        if let package, !ADB.isPackageName(package) { return }
+        managingApps = true
+        defer { managingApps = false }
+        let command = package.map { "am start -a android.settings.APPLICATION_DETAILS_SETTINGS -d \(ADB.quote("package:" + $0))" }
+            ?? "am start -a android.settings.MANAGE_DEFAULT_APPS_SETTINGS"
+        let r = await shell(command)
+        if r.ok && !r.text.contains("Error:") && !r.text.contains("Exception") {
+            lastMessage = L("Ayarlar TV'de açıldı. Seçimini Kumanda sekmesinden yap.",
+                            "Settings opened on the TV. Use the Remote tab to make your selection.")
+        } else {
+            let fallback = await shell("am start -a android.settings.MANAGE_APPLICATIONS_SETTINGS")
+            lastMessage = fallback.ok && !fallback.text.contains("Error:") && !fallback.text.contains("Exception")
+                ? L("Bu TV doğrudan bu ayarı desteklemiyor. Uygulama ayarları açıldı; Kumanda sekmesinden devam et.",
+                    "This TV does not support that settings shortcut. App settings opened; continue using the Remote tab.")
+                : L("Bu TV'de uygulama ayarları açılamadı: ", "Could not open app settings on this TV: ") + fallback.text
+        }
     }
 
     func launch(_ app: TVApp) {

@@ -1,0 +1,15 @@
+<resources>
+    <string name="apps">Uygulamaların</string>
+    <string name="tagline">Daha sade. Çok daha hızlı.</string>
+    <string name="hint">Açmak için OK · Seçenekler için OK basılı tut · Menü ile sırala</string>
+    <string name="moving">Yön tuşlarıyla taşı · OK ile kaydet · Geri ile iptal et</string>
+    <string name="settings">Ayarlar</string>
+    <string name="reorder">Sırala</string>
+    <string name="done">Sırayı kaydet</string>
+    <string name="empty">Uygulama bulunamadı</string>
+    <string name="changed">Sıra Mac’ten değiştirildi. Güncel sıra gösteriliyor.</string>
+    <string name="save_failed">Sıra kaydedilemedi. Tekrar dene.</string>
+    <string name="open_failed">Bu uygulama açılamadı.</string>
+    <string name="loading">Uygulamalar yükleniyor…</string>
+<string name="home_key_description">Home tuşunu ADBroom’a yönlendirir. Yalnızca Home tuşunu ve diğer ana ekranların açılmasını izler. Ekran içeriğini okumaz.</string>
+</resources>

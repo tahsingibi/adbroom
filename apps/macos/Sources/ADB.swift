@@ -1,4 +1,5 @@
 import Foundation
+import Darwin
 
 /// Thin wrapper around the `adb` / `scrcpy` command-line tools.
 /// GUI apps don't inherit the shell PATH, so the tools are looked up in well-known locations.
@@ -51,18 +52,39 @@ enum ADB {
         p.executableURL = URL(fileURLWithPath: adb)
         p.arguments = args
         p.environment = environment
-        let pipe = Pipe()
-        p.standardOutput = pipe
-        p.standardError = pipe
+        // Redirect to a private temporary file instead of blocking on a pipe's EOF.
+        // ADB can leave inherited pipe descriptors open after its own process exits,
+        // which made readDataToEndOfFile hang indefinitely and stall page loading.
+        let outputURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("adbroom-adb-\(UUID().uuidString).log")
+        guard FileManager.default.createFile(atPath: outputURL.path, contents: nil,
+                                             attributes: [.posixPermissions: 0o600]),
+              let output = try? FileHandle(forWritingTo: outputURL) else {
+            return Result(data: Data("Could not create temporary ADB output file".utf8), code: 126)
+        }
+        defer {
+            try? output.close()
+            try? FileManager.default.removeItem(at: outputURL)
+        }
+        p.standardOutput = output
+        p.standardError = output
+        let finished = DispatchSemaphore(value: 0)
+        p.terminationHandler = { _ in finished.signal() }
         do { try p.run() } catch {
             return Result(data: Data(error.localizedDescription.utf8), code: 126)
         }
-        let killer = DispatchWorkItem { if p.isRunning { p.terminate() } }
-        DispatchQueue.global().asyncAfter(deadline: .now() + timeout, execute: killer)
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        p.waitUntilExit()
-        killer.cancel()
-        return Result(data: data, code: p.terminationStatus)
+        let timedOut = finished.wait(timeout: .now() + timeout) == .timedOut
+        if timedOut {
+            p.terminate()
+            if finished.wait(timeout: .now() + 1) == .timedOut {
+                _ = kill(p.processIdentifier, SIGKILL)
+                _ = finished.wait(timeout: .now() + 1)
+            }
+        }
+        if !p.isRunning { p.waitUntilExit() }
+        try? output.synchronize()
+        let data = (try? Data(contentsOf: outputURL)) ?? Data()
+        return Result(data: data, code: timedOut ? 124 : p.terminationStatus)
     }
 
     /// Single-quotes a string for the device shell.
